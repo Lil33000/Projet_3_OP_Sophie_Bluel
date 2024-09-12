@@ -312,12 +312,12 @@ color: #B1663C;
 #login {
   width: 50%;
   margin: auto;
-}
-#login > * {
   text-align: center;
 }
+
 #login h2 {
   margin-bottom: 20px;
+  text-align: center;
 }
 #login form {
   text-align: left;
@@ -335,11 +335,15 @@ color: #B1663C;
 #login label {
   margin: 2em 0 1em 0;
 }
-#login textarea {
-  border: none;
-  box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.09);
+
+.container {
+  display: flex;
+ justify-content: center;
+  margin-bottom: 20px;
 }
-#login p {
-  text-decoration: underline;
-  cursor: pointer;
+
+#edit-projects {
+  padding: 10px 20px;
+  text-decoration: none;
+  color: black;
 }

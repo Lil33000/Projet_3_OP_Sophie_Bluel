@@ -2,15 +2,21 @@
 
 async function listsImages() {
   try {
-    // récupération des projects via l'API
+   
     const response = await fetch("http://localhost:5678/api/works");
-    const projets = await response.json();
+    const projects = await response.json();
 
-    const categories = await renderCategories();
+    const token = localStorage.getItem("authToken");
 
-    renderFilterButtons(categories);
-    setupFilterButtons(projets);
-    renderProjets(projets);
+    if (token) {
+      showOptionsAdmin(projects);
+    } else {
+      const categories = await renderCategories();
+      renderFilterButtons(categories);
+      setupFilterButtons(projects);
+    }
+
+    renderProjects(projects);
   } catch (error) {
     console.error("Erreur lors de la récupération des données :", error);
   }
@@ -22,23 +28,12 @@ const renderCategories = async () => {
   return await response.json();
 };
 
-const renderProjets = (projets) => {
-  document.querySelector(".gallery").innerHTML = projets
-    .map(
-      (projet) => `
-    <figure>
-      <img src="${projet.imageUrl}" alt="${projet.title}">
-      <figcaption>${projet.title}</figcaption>
-    </figure>
-  `
-    )
-    .join("");
-};
 
-const filterProjets = (projets, category) => {
+
+const filterProjects = (projects, category) => {
   return category === "all"
-    ? projets
-    : projets.filter((projet) => projet.categoryId == category);
+    ? projects
+    : projects.filter((project) => project.categoryId == category);
 };
 
 const renderFilterButtons = (categories) => {
@@ -56,7 +51,7 @@ const renderFilterButtons = (categories) => {
   });
 };
 
-const setupFilterButtons = (projets) => {
+const setupFilterButtons = (projects) => {
   const buttons = document.querySelectorAll("#filter-btn button");
 
   buttons.forEach((button) => {
@@ -65,10 +60,55 @@ const setupFilterButtons = (projets) => {
 
       button.classList.add("active");
 
-      const filteredProjets = filterProjets(projets, button.dataset.category);
-      renderProjets(filteredProjets);
+      const filteredProjects = filterProjects(projects, button.dataset.category);
+      renderProjects(filteredProjects);
     });
   });
 };
+const renderProjects = (projects) => {
+  document.querySelector(".gallery").innerHTML = projects
+    .map(
+      (project) => `
+    <figure>
+      <img src="${project.imageUrl}" alt="${project.title}">
+      <figcaption>${project.title}</figcaption>
+    </figure>
+  `
+    )
+    .join("");
+};
+
+//* AFFICHER LE BOUTON MODIFIER ET CACHER LES CATEGORIES SI CONNECTÉ *\\
+
+function showOptionsAdmin() {
+
+  const filterButton = document.querySelector("#filter-btn");
+  filterButton.style.display = "none"; 
+
+  const loginLink = document.querySelector("nav ul li:nth-child(3)");
+  loginLink.innerHTML = `<a href="#" id="logout">logout</a>`;
+
+  document.getElementById("logout").addEventListener("click", function () {
+    localStorage.removeItem("authToken");
+    window.location.reload(); 
+  });
+
+  const portfolioHeader = document.querySelector("#portfolio h2");
+  const editLink = document.createElement("a");
+  editLink.innerText = "modifier";
+  editLink.href = "#";
+  editLink.id = "edit-projects";
+  
+ 
+  const container = document.createElement("div");
+  container.classList.add("container");
+
+  
+  portfolioHeader.parentNode.insertBefore(container, portfolioHeader);
+  container.appendChild(portfolioHeader);
+  container.appendChild(editLink);
+
+
+}
 
 listsImages();

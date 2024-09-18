@@ -78,7 +78,7 @@ const renderProjects = (projects) => {
     .join("");
 };
 
-//* AFFICHER LE BOUTON MODIFIER ET CACHER LES CATEGORIES SI CONNECTÉ *\\
+//* AFFICHER LA BARRE NOIRE, LE BOUTON MODIFIER ET CACHER LES CATEGORIES SI CONNECTÉ *\\
 
 function showOptionsAdmin() {
 
@@ -93,10 +93,24 @@ function showOptionsAdmin() {
     window.location.reload(); 
   });
 
+  const editBar = document.createElement("div");
+  editBar.innerHTML = `<i class="fas fa-edit"></i> Mode Édition`;
+  editBar.style.position = "fixed";
+  editBar.style.top = "0";
+  editBar.style.left = "0";
+  editBar.style.width = "100%";
+  editBar.style.backgroundColor = "black";
+  editBar.style.color = "white";
+  editBar.style.textAlign = "center";
+  editBar.style.padding = "15px 0";
+  editBar.style.zIndex = "10"; 
+  document.body.appendChild(editBar);
+ 
+
   const portfolioHeader = document.querySelector("#portfolio h2");
   const editLink = document.createElement("a");
-  editLink.innerText = "modifier";
-  editLink.href = "#";
+  editLink.innerHTML = `<i class="fas fa-edit"></i> modifier`; 
+  editLink.href = "#edit-modal";
   editLink.id = "edit-projects";
   
  
@@ -107,8 +121,6 @@ function showOptionsAdmin() {
   portfolioHeader.parentNode.insertBefore(container, portfolioHeader);
   container.appendChild(portfolioHeader);
   container.appendChild(editLink);
-
-
 }
 
 listsImages();

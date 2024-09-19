@@ -94,23 +94,16 @@ function showOptionsAdmin() {
   });
 
   const editBar = document.createElement("div");
+  editBar.classList.add("edit-bar");
   editBar.innerHTML = `<i class="fas fa-edit"></i> Mode Édition`;
-  editBar.style.position = "fixed";
-  editBar.style.top = "0";
-  editBar.style.left = "0";
-  editBar.style.width = "100%";
-  editBar.style.backgroundColor = "black";
-  editBar.style.color = "white";
-  editBar.style.textAlign = "center";
-  editBar.style.padding = "15px 0";
-  editBar.style.zIndex = "10"; 
+  
   document.body.appendChild(editBar);
  
 
   const portfolioHeader = document.querySelector("#portfolio h2");
   const editLink = document.createElement("a");
   editLink.innerHTML = `<i class="fas fa-edit"></i> modifier`; 
-  editLink.href = "#edit-modal";
+  editLink.href = "#";
   editLink.id = "edit-projects";
   
  

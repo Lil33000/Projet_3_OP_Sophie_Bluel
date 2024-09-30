@@ -81,11 +81,47 @@
         </ul>
       </nav>
     </footer>
-    <div class="modal-content">
-      <span class="close">&times;</span>
-      <h2>Galerie photo</h2>
-      <div class="modal-gallery"></div>
+    <!-- MODAL -->
+    <div class="modal-overlay"></div>
+    <div id="edit-modal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2 class="modal-title">Galerie photo</h2>
+        <div class="modal-gallery"></div>
+        <div class="separator"></div>
+        <button id="add-photo-btn">Ajouter une photo</button>
+        <div id="add-photo-form" style="display: none">
+          <span id="back-arrow">&larr;</span>
+          <h2>Ajout photo</h2>
+          <form id="new-photo-form" method="post">
+            <div>
+              <label for="photo-file" class="upload-label">
+                <div class="upload-box" id="upload-box-preview">
+                  <i class="fas fa-image"></i>
+                  <span>+ Ajouter photo</span>
+                  <small>jpg, png : 4mo max</small>
+                </div>
+              </label>
+              <input
+                type="file"
+                id="photo-file"
+                name="file"
+                accept="image/*"
+                required
+              />
+            </div>
+            <label for="photo-title">Titre</label>
+            <input type="text" id="photo-title" name="title" required />
+
+            <label for="photo-category">Catégorie</label>
+            <select id="photo-category" name="category" required></select>
+
+            <div class="separator"></div>
+
+            <button type="submit" class="add-btn">Valider</button>
+          </form>
+        </div>
+      </div>
     </div>
-  </div>
   </body>
 </html>

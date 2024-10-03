@@ -76,6 +76,8 @@ const renderProjects = (projects) => {
   `
     )
     .join("");
+
+  setupDeleteIcons();
 };
 
 //* AFFICHER LA BARRE EDIT, LE BOUTON MODIFIER ET CACHER LES CATEGORIES SI CONNECTÉ *\\
@@ -146,24 +148,13 @@ function openModal(projects) {
     }
   });
 
-  const deleteIcons = document.querySelectorAll(".delete-icon");
-  deleteIcons.forEach((icon) => {
-    icon.addEventListener("click", function () {
-      const projectId = icon.getAttribute("data-id");
-      const projectElement = icon.parentElement;
-      deleteProject(projectId, projectElement);
-    });
+  document.getElementById("add-photo-btn").addEventListener("click", function () {
+    document.querySelector(".modal-title").style.display = "none";
+    document.querySelector(".separator").style.display = "none";
+    document.querySelector(".modal-gallery").style.display = "none";
+    document.getElementById("add-photo-btn").style.display = "none";
+    document.getElementById("add-photo-form").style.display = "block";
   });
-
-  document
-    .getElementById("add-photo-btn")
-    .addEventListener("click", function () {
-      document.querySelector(".modal-title").style.display = "none";
-      document.querySelector(".separator").style.display = "none";
-      document.querySelector(".modal-gallery").style.display = "none";
-      document.getElementById("add-photo-btn").style.display = "none";
-      document.getElementById("add-photo-form").style.display = "block";
-    });
 
   document.getElementById("back-arrow").addEventListener("click", function () {
     document.querySelector(".modal-title").style.display = "block";
@@ -183,12 +174,12 @@ function openModal(projects) {
         };
         reader.readAsDataURL(file);
     }
-});
+  });
 
   async function fetchCategories() {
     const categories = await renderCategories();
     const categorySelect = document.getElementById("photo-category");
-
+    categorySelect.innerHTML = "";
     categories.forEach((category) => {
       const option = document.createElement("option");
       option.value = category.id;
@@ -199,79 +190,73 @@ function openModal(projects) {
 
   fetchCategories();
 
-  document
-  .getElementById("new-photo-form")
-  .addEventListener("submit", async function (e) {
-    e.preventDefault();
+  const form = document.getElementById("new-photo-form");
+  form.removeEventListener("submit", handleFormSubmit); 
+  form.addEventListener("submit", handleFormSubmit);
+}
 
-    const title = document.getElementById("photo-title").value;
-    const category = document.getElementById("photo-category").value;
-    const fileInput = document.getElementById("photo-file");
-    const file = fileInput.files[0];
+async function handleFormSubmit(e) {
+  e.preventDefault();
 
-    if (!file) {
-      alert("Veuillez choisir une photo.");
-      return;
+  const title = document.getElementById("photo-title").value;
+  const category = document.getElementById("photo-category").value;
+  const fileInput = document.getElementById("photo-file");
+  const file = fileInput.files[0];
+
+  if (!file) {
+    alert("Veuillez choisir une photo.");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("title", title);
+  formData.append("category", category);
+  formData.append("image", file);
+
+  try {
+    const token = localStorage.getItem("authToken");
+    const response = await fetch("http://localhost:5678/api/works", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    if (response.ok) {
+      const newProject = await response.json();
+      alert("Photo ajoutée avec succès !");
+
+      const modalGallery = document.querySelector(".modal-gallery");
+      modalGallery.innerHTML += `
+        <figure data-id="${newProject.id}">
+          <img src="${newProject.imageUrl}" alt="${newProject.title}">
+          <i class="fas fa-trash delete-icon" data-id="${newProject.id}"></i>
+        </figure>
+      `;
+
+      const gallery = document.querySelector(".gallery");
+      gallery.innerHTML += `
+        <figure data-id="${newProject.id}">
+          <img src="${newProject.imageUrl}" alt="${newProject.title}">
+          <figcaption>${newProject.title}</figcaption>
+        </figure>
+      `;
+
+      document.getElementById("new-photo-form").reset();
+      document.getElementById("upload-box-preview").innerHTML = `
+        <i class="fas fa-image"></i>
+        <span>+ Ajouter photo</span>
+        <small>jpg, png : 4mo max</small>
+      `;
+
+      setupDeleteIcons();
+    } else {
+      alert("Erreur lors de l'ajout de la photo.");
     }
-
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("category", category);
-    formData.append("image", file);
-
-    try {
-      const token = localStorage.getItem("authToken");
-      const response = await fetch("http://localhost:5678/api/works", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
-
-      if (response.ok) {
-        const newProject = await response.json();
-        alert("Photo ajoutée avec succès !");
-
-        document.getElementById("new-photo-form").reset();
-
-        const previewBox = document.getElementById("upload-box-preview");
-        previewBox.innerHTML = `
-          <i class="fas fa-image"></i>
-          <span>+ Ajouter photo</span>
-          <small>jpg, png : 4mo max</small>
-        `;
-
-        const modalGallery = document.querySelector(".modal-gallery");
-        modalGallery.innerHTML += `
-          <figure data-id="${newProject.id}">
-            <img src="${newProject.imageUrl}" alt="${newProject.title}">
-            <i class="fas fa-trash delete-icon" data-id="${newProject.id}"></i>
-          </figure>
-        `;
-
-        const gallery = document.querySelector(".gallery");
-        gallery.innerHTML += `
-          <figure data-id="${newProject.id}">
-            <img src="${newProject.imageUrl}" alt="${newProject.title}">
-            <figcaption>${newProject.title}</figcaption>
-          </figure>
-        `;
-
-        const deleteIcon = document.querySelector(
-          `.modal-gallery figure[data-id="${newProject.id}"] .delete-icon`
-        );
-        deleteIcon.addEventListener("click", function () {
-          deleteProject(newProject.id, deleteIcon.parentElement);
-        });
-
-      } else {
-        alert("Erreur lors de l'ajout de la photo.");
-      }
-    } catch (error) {
-      console.error("Erreur lors de l'ajout de la photo :", error);
-    }
-  });
+  } catch (error) {
+    console.error("Erreur lors de l'ajout de la photo :", error);
+  }
 }
 
 //* FONCTION POUR SUPPRIMER LES PROJETS *\\
@@ -306,5 +291,18 @@ async function deleteProject(projectId, projectElement) {
   }
 }
 
+function setupDeleteIcons() {
+  const deleteIcons = document.querySelectorAll(".delete-icon");
+  deleteIcons.forEach((icon) => {
+    icon.removeEventListener("click", handleDeleteClick); 
+    icon.addEventListener("click", handleDeleteClick); 
+  });
+}
+
+function handleDeleteClick(event) {
+  const projectId = event.target.getAttribute("data-id");
+  const projectElement = event.target.parentElement;
+  deleteProject(projectId, projectElement);
+}
 
 listsImages();

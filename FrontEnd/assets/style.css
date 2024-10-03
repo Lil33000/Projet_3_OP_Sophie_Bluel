@@ -379,7 +379,7 @@ color: #B1663C;
 
 .modal-content {
   background-color: white;
-  margin: 70px auto; 
+  margin: 50px auto; 
   padding: 35px;
   width: 50%; 
   max-width: 600px;
@@ -518,7 +518,7 @@ form:valid .add-btn {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: #f0f0f0;
+  background-color: #E8F1F6;
   padding: 15px;
   border-radius: 10px;
 }

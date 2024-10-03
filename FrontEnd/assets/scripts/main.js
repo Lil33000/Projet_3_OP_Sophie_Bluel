@@ -179,7 +179,7 @@ function openModal(projects) {
         const reader = new FileReader(); 
         reader.onload = function(e) {
             const previewBox = document.getElementById('upload-box-preview');
-            previewBox.innerHTML = `<img src="${e.target.result}" alt="Aperçu de l'image sélectionnée">`;
+            previewBox.innerHTML = `<img src="${e.target.result}">`;
         };
         reader.readAsDataURL(file);
     }
@@ -200,54 +200,78 @@ function openModal(projects) {
   fetchCategories();
 
   document
-    .getElementById("new-photo-form")
-    .addEventListener("submit", async function (e) {
-      e.preventDefault();
+  .getElementById("new-photo-form")
+  .addEventListener("submit", async function (e) {
+    e.preventDefault();
 
-      const title = document.getElementById("photo-title").value;
-      const category = document.getElementById("photo-category").value;
-      const fileInput = document.getElementById("photo-file");
-      const file = fileInput.files[0];
+    const title = document.getElementById("photo-title").value;
+    const category = document.getElementById("photo-category").value;
+    const fileInput = document.getElementById("photo-file");
+    const file = fileInput.files[0];
 
-      if (!file) {
-        alert("Veuillez choisir une photo.");
-        return;
-      }
-      
-      const formData = new FormData();
-      formData.append("title", title);
-      formData.append("category", category);
-      formData.append("image", file);
+    if (!file) {
+      alert("Veuillez choisir une photo.");
+      return;
+    }
 
-      try {
-        const token = localStorage.getItem("authToken");
-        const response = await fetch("http://localhost:5678/api/works", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: formData,
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("category", category);
+    formData.append("image", file);
+
+    try {
+      const token = localStorage.getItem("authToken");
+      const response = await fetch("http://localhost:5678/api/works", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (response.ok) {
+        const newProject = await response.json();
+        alert("Photo ajoutée avec succès !");
+
+        document.getElementById("new-photo-form").reset();
+
+        const previewBox = document.getElementById("upload-box-preview");
+        previewBox.innerHTML = `
+          <i class="fas fa-image"></i>
+          <span>+ Ajouter photo</span>
+          <small>jpg, png : 4mo max</small>
+        `;
+
+        const modalGallery = document.querySelector(".modal-gallery");
+        modalGallery.innerHTML += `
+          <figure data-id="${newProject.id}">
+            <img src="${newProject.imageUrl}" alt="${newProject.title}">
+            <i class="fas fa-trash delete-icon" data-id="${newProject.id}"></i>
+          </figure>
+        `;
+
+        const gallery = document.querySelector(".gallery");
+        gallery.innerHTML += `
+          <figure data-id="${newProject.id}">
+            <img src="${newProject.imageUrl}" alt="${newProject.title}">
+            <figcaption>${newProject.title}</figcaption>
+          </figure>
+        `;
+
+        const deleteIcon = document.querySelector(
+          `.modal-gallery figure[data-id="${newProject.id}"] .delete-icon`
+        );
+        deleteIcon.addEventListener("click", function () {
+          deleteProject(newProject.id, deleteIcon.parentElement);
         });
 
-        if (response.ok) {
-          alert("Photo ajoutée avec succès !");
-          
-          document.getElementById("new-photo-form").reset();
-          
-          const previewBox = document.getElementById('upload-box-preview');
-          previewBox.innerHTML = `
-            <i class="fas fa-image"></i>
-            <span>+ Ajouter photo</span>
-            <small>jpg, png : 4mo max</small>
-          `;
-    
-        } else {
-          alert("Erreur lors de l'ajout de la photo.");
-        }
-      } catch (error) {
-        console.error("Erreur lors de l'ajout de la photo :", error);
+      } else {
+        alert("Erreur lors de l'ajout de la photo.");
       }
-    });
+    } catch (error) {
+      console.error("Erreur lors de l'ajout de la photo :", error);
+    }
+  });
 }
 
 //* FONCTION POUR SUPPRIMER LES PROJETS *\\
